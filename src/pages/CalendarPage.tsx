@@ -138,48 +138,48 @@ export function CalendarPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="groups" className="space-y-4">
+        <TabsContent value="groups" className="space-y-4 mt-4">
           {/* Groups List */}
-          {groups.length === 0 ? (
+          {!groups || groups.length === 0 ? (
             <Card className="p-8 text-center">
               <p className="text-muted-foreground">Nessun gruppo disponibile</p>
             </Card>
           ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {groups.map((group) => (
-              <Card key={group.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{group.name}</CardTitle>
-                    <Badge className={getLevelColor(group.level)}>
-                      {getLevelLabel(group.level)}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {getCategoryLabel(group.macro_category)}
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                    <span>{DAYS_OF_WEEK[group.day_of_week - 1]}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span>{group.time_slot}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span>{group.athlete_count || 0} atleti iscritti</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span>Via B. Longhena, 22 - Verona</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {groups.map((group) => (
+                <Card key={group.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{group.name}</CardTitle>
+                      <Badge className={getLevelColor(group.level)}>
+                        {getLevelLabel(group.level)}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {getCategoryLabel(group.macro_category)}
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                      <span>{DAYS_OF_WEEK[group.day_of_week - 1] || "-"}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <span>{group.time_slot}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span>{group.athlete_count || 0} atleti iscritti</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <span>Via B. Longhena, 22 - Verona</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
         </TabsContent>
       </Tabs>

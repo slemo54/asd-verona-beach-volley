@@ -106,10 +106,19 @@ export function ShopPage() {
 
       {/* Products Grid */}
       <div className="grid gap-4 md:grid-cols-3">
-        {products.map((product) => (
+        {products.map((product, idx) => (
           <Card key={product.id} className="overflow-hidden">
-            <div className="aspect-square bg-muted flex items-center justify-center">
-              <Package className="h-16 w-16 text-muted-foreground" />
+            <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
+              <img 
+                src={`/product-${(idx % 7) + 1}.jpg`}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).parentElement?.querySelector('.fallback-icon')?.classList.remove('hidden');
+                }}
+              />
+              <Package className="h-16 w-16 text-muted-foreground fallback-icon hidden" />
             </div>
             <CardContent className="p-4">
               <div className="flex items-start justify-between">

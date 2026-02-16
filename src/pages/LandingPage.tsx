@@ -79,9 +79,14 @@ export function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden min-h-[70vh] flex items-center justify-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-muted">
+        <div className="absolute inset-0">
+          <img 
+            src="/hero-bg.jpg" 
+            alt="Beach Volley" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-background/80" />
           <div className="absolute inset-0 bg-gradient-to-br from-vrb-orange/10 via-vrb-pink/5 to-vrb-purple/10" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-vrb-orange/20 via-transparent to-transparent" />
         </div>
         
         <div className="relative container mx-auto px-4 py-16">

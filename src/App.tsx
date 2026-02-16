@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { useAuth } from "@/hooks/useAuth"
 import { useProfile } from "@/hooks/useProfile"
+import { useState } from "react"
 import { LoginPage } from "@/pages/LoginPage"
 import { LandingPage } from "@/pages/LandingPage"
 import { CalendarPage } from "@/pages/CalendarPage"
@@ -14,7 +15,8 @@ import { ProtectedRoute } from "@/components/layout/ProtectedRoute"
 import { AppLayout } from "@/components/layout/AppLayout"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Loader2, AlertCircle, Volleyball, Users, CreditCard, FileText } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Loader2, AlertCircle, Volleyball, Users, CreditCard, FileText, Camera } from "lucide-react"
 import { useGroups } from "@/hooks/useGroups"
 import { usePaymentStats } from "@/hooks/usePayments"
 
@@ -137,7 +139,23 @@ function AthleteDashboardPage() {
  */
 function ProfilePage() {
   const { user } = useAuth()
-  const { profile, isLoading } = useProfile(user?.id)
+  const { profile, isLoading, uploadAvatar } = useProfile(user?.id)
+  const [isUploading, setIsUploading] = useState(false)
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    setIsUploading(true)
+    try {
+      await uploadAvatar(file)
+      alert("Immagine profilo aggiornata!")
+    } catch (error) {
+      alert("Errore durante il caricamento")
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -153,6 +171,38 @@ function ProfilePage() {
         <h1 className="text-2xl font-bold">Il Mio Profilo</h1>
         <p className="text-muted-foreground">Gestisci i tuoi dati personali</p>
       </div>
+
+      {/* Avatar Section */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col items-center">
+            <div className="relative">
+              <Avatar className="h-24 w-24">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover rounded-full" />
+                ) : (
+                  <AvatarFallback className="bg-gradient-to-br from-vrb-orange to-vrb-magenta text-white text-2xl">
+                    {profile?.full_name?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() || "??"}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              <label className="absolute -bottom-2 -right-2 bg-primary text-primary-foreground p-2 rounded-full cursor-pointer hover:bg-primary/90 transition-colors">
+                <Camera className="h-4 w-4" />
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={handleAvatarChange}
+                  disabled={isUploading}
+                />
+              </label>
+            </div>
+            <p className="text-sm text-muted-foreground mt-4">
+              {isUploading ? "Caricamento..." : "Clicca l'icona per cambiare foto"}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -8,6 +8,7 @@ interface UseProfileReturn {
   error: Error | null
   refetch: () => Promise<void>
   updateProfile: (updates: ProfileUpdate) => Promise<void>
+  uploadAvatar: (file: File) => Promise<void>
 }
 
 // Tipo per gli aggiornamenti del profilo (esclude i campi generati)
@@ -87,12 +88,44 @@ export function useProfile(userId?: string): UseProfileReturn {
     }
   }, [userId])
 
+  const uploadAvatar = useCallback(async (file: File) => {
+    if (!userId) {
+      throw new Error("Utente non autenticato")
+    }
+
+    setIsLoading(true)
+
+    try {
+      const fileExt = file.name.split(".").pop()
+      const fileName = `${userId}/${Date.now()}.${fileExt}`
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, file)
+
+      if (uploadError) {
+        throw new Error(uploadError.message)
+      }
+
+      const { data: publicUrl } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(fileName)
+
+      await updateProfile({ avatar_url: publicUrl.publicUrl })
+    } catch (err) {
+      throw err instanceof Error ? err : new Error("Errore durante l'upload")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [userId, updateProfile])
+
   return {
     profile,
     isLoading,
     error,
     refetch: fetchProfile,
     updateProfile,
+    uploadAvatar,
   }
 }
 
