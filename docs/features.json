@@ -1,0 +1,292 @@
+{
+  "features": [
+    {
+      "id": "F001",
+      "name": "Authentication System",
+      "description": "Email/password auth via Supabase con ruoli atleta e admin, profile creation on signup",
+      "priority": "critical",
+      "dependencies": [],
+      "acceptance_criteria": [
+        "User can sign up with email and password",
+        "User can log in and receives a session token",
+        "Profile is auto-created in profiles table on signup via Edge Function",
+        "Admin role is assignable only by existing admin",
+        "Unauthenticated users are redirected to login page",
+        "Session persists across browser refresh"
+      ],
+      "passes": false,
+      "notes": "Admin seed: asdveronabeachvolley@gmail.com / 2626"
+    },
+    {
+      "id": "F002",
+      "name": "Athlete Profile Management",
+      "description": "Area personale atleta con dati anagrafici, taglia maglietta, contatto, avatar",
+      "priority": "critical",
+      "dependencies": ["F001"],
+      "acceptance_criteria": [
+        "Athlete can view own profile with all fields",
+        "Athlete can edit full_name, phone, tshirt_size, avatar",
+        "Athlete cannot view other athletes' profiles",
+        "Admin can view and edit any athlete profile",
+        "Profile changes are persisted immediately"
+      ],
+      "passes": false,
+      "notes": "RLS: profiles SELECT/UPDATE restricted to own row unless admin"
+    },
+    {
+      "id": "F003",
+      "name": "Medical Certificate Management",
+      "description": "Upload certificati medici con tipo (agonistico/non agonistico), scadenza e semaforo a 3 colori",
+      "priority": "critical",
+      "dependencies": ["F001", "F002"],
+      "acceptance_criteria": [
+        "Athlete can upload PDF/JPG/PNG certificate (max 5MB)",
+        "Athlete selects certificate type (agonistico/non agonistico)",
+        "Athlete sets expiry date",
+        "Semaphore shows green (>30 days), yellow (<=30 days), red (expired/missing)",
+        "Admin sees all certificates with semaphore status",
+        "Daily cron updates certificate statuses",
+        "File is stored in Supabase Storage with RLS"
+      ],
+      "passes": false,
+      "notes": "Semaphore logic matches Excel formula in Gruppi_Atleti!P column"
+    },
+    {
+      "id": "F004",
+      "name": "Group Management",
+      "description": "CRUD per 17 gruppi con ID, nome, allenatore, macro-categoria (M/F), livello (Base/Medio/Pro), giorno e orario",
+      "priority": "critical",
+      "dependencies": ["F001"],
+      "acceptance_criteria": [
+        "Admin can create a new group with all fields",
+        "Admin can edit group details (name, coach, category, level, schedule)",
+        "Admin can assign/remove athletes to/from groups",
+        "Admin can move athlete between groups with log entry",
+        "Athletes see their assigned group(s) on dashboard",
+        "Group list shows coach, schedule, athlete count",
+        "17 existing groups are seeded from Excel data"
+      ],
+      "passes": false,
+      "notes": "Gruppi 1-17 from Excel. Coach assignment via coach_id FK."
+    },
+    {
+      "id": "F005",
+      "name": "Training Calendar",
+      "description": "Calendario settimanale allenamenti Lun-Ven con fasce orarie 18:30-20:00 e 20:00-21:30",
+      "priority": "critical",
+      "dependencies": ["F004"],
+      "acceptance_criteria": [
+        "Calendar shows weekly view Mon-Fri",
+        "Each day shows groups scheduled for 18:30-20:00 and 20:00-21:30",
+        "Admin can create/edit training sessions for a group on a date",
+        "Athlete sees only their group's sessions highlighted",
+        "Calendar is navigable by week (previous/next)"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F006",
+      "name": "Attendance Tracking",
+      "description": "Registrazione presenze per sessione con conteggio automatico presenze/assenze",
+      "priority": "critical",
+      "dependencies": ["F004", "F005"],
+      "acceptance_criteria": [
+        "Admin opens a session and sees list of group athletes",
+        "Admin marks each athlete as present (S) or absent (N)",
+        "Admin can mark absence as 'needs recovery'",
+        "Attendance counts (presenze, assenze) auto-update per athlete",
+        "Athlete can view own attendance history with totals",
+        "Swipe gesture for quick present/absent marking on mobile"
+      ],
+      "passes": false,
+      "notes": "Matches Presenze sheet: Presente S/N, Assenza da recuperare S/N"
+    },
+    {
+      "id": "F007",
+      "name": "Recovery System",
+      "description": "Prenotazione recuperi in gruppi dello stesso livello con tracking completamento",
+      "priority": "critical",
+      "dependencies": ["F006"],
+      "acceptance_criteria": [
+        "Athlete sees count of recoveries needed (assenze - recuperi fatti)",
+        "Athlete can browse available recovery slots filtered by same level",
+        "System blocks booking if target group is full (max_athletes)",
+        "Athlete books a recovery session in compatible group",
+        "Recovery is tracked: date, target group, completion",
+        "Recovery count updates in athlete stats",
+        "Admin can see all pending and completed recoveries"
+      ],
+      "passes": false,
+      "notes": "Self-service with auto-constraints. Level must match."
+    },
+    {
+      "id": "F008",
+      "name": "Payment Management",
+      "description": "Gestione pagamenti: quota stagionale, quota associativa, pagato, saldo, semaforo a 3 colori",
+      "priority": "critical",
+      "dependencies": ["F001", "F002"],
+      "acceptance_criteria": [
+        "Admin creates payment record for athlete with season fee and association fee",
+        "Admin records partial or full payments with method (bonifico/PayPal/contanti)",
+        "Balance due auto-calculated: total + association - paid",
+        "Semaphore: green (paid in full), yellow (partial), red (nothing paid)",
+        "Athlete sees own payment status with semaphore on dashboard",
+        "Payment transaction history is maintained",
+        "Admin has overview of all athletes' payment statuses"
+      ],
+      "passes": false,
+      "notes": "Season fees: 480-860 EUR. Association fee: 15 EUR. Matches Excel Q column formula."
+    },
+    {
+      "id": "F009",
+      "name": "Payment Reminders & Morosity Block",
+      "description": "Promemoria visivi e email per pagamenti in ritardo, blocco prenotazioni per morosi",
+      "priority": "high",
+      "dependencies": ["F008"],
+      "acceptance_criteria": [
+        "Athlete sees visual warning banner on login if payment overdue",
+        "Weekly cron sends email reminder to athletes with balance > 0",
+        "Moroso athletes can view data but cannot book courts or place orders",
+        "Block is enforced both in UI (disabled buttons) and RLS (INSERT denied)",
+        "Admin can override morosity block for specific athletes"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F010",
+      "name": "Admin Dashboard",
+      "description": "Dashboard admin con overview completa: gruppi, atleti, pagamenti, certificati, logs",
+      "priority": "critical",
+      "dependencies": ["F001", "F004", "F008"],
+      "acceptance_criteria": [
+        "Admin sees summary cards: total athletes, groups, overdue payments, expiring certificates",
+        "Admin can navigate to detailed views for each section",
+        "Admin can search and filter athletes",
+        "Admin can bulk-upload new athletes (CSV import)",
+        "Admin actions are logged in admin_logs table",
+        "Dashboard is accessible only to admin role"
+      ],
+      "passes": false,
+      "notes": "Login: asdveronabeachvolley@gmail.com / 2626"
+    },
+    {
+      "id": "F011",
+      "name": "Court Booking System",
+      "description": "Prenotazione campi beach volley per il sabato",
+      "priority": "high",
+      "dependencies": ["F001", "F009"],
+      "acceptance_criteria": [
+        "Athlete sees available Saturday court slots",
+        "Athlete can book a court (if not moroso)",
+        "Double-booking same court/date/slot is prevented",
+        "Athlete can cancel own booking",
+        "Admin sees all bookings and can manage them",
+        "Booking confirmation shown after successful booking"
+      ],
+      "passes": false,
+      "notes": "Saturday only. Morosity check via F009."
+    },
+    {
+      "id": "F012",
+      "name": "E-Commerce Product Catalog",
+      "description": "Catalogo prodotti merchandising VRB con immagini, taglie, prezzi",
+      "priority": "high",
+      "dependencies": ["F001"],
+      "acceptance_criteria": [
+        "Product grid shows all active products with image, name, price",
+        "Product detail page shows description, available sizes, gallery",
+        "Admin can CRUD products (name, description, price, sizes, images, stock)",
+        "Products filterable by category (tshirt, sweatshirt, accessory)",
+        "Product images stored in Supabase Storage",
+        "Out-of-stock products show appropriate indicator"
+      ],
+      "passes": false,
+      "notes": "Initial products: VRB t-shirt white, VRB t-shirt black, VRB sweatshirt. From WhatsApp images."
+    },
+    {
+      "id": "F013",
+      "name": "Shopping Cart & Orders",
+      "description": "Carrello acquisti e processo ordine per merchandising",
+      "priority": "high",
+      "dependencies": ["F012", "F009"],
+      "acceptance_criteria": [
+        "Athlete can add products to cart with size selection",
+        "Cart shows items, quantities, sizes, subtotals, total",
+        "Athlete can modify quantities or remove items",
+        "Athlete can place order (if not moroso)",
+        "Order confirmation page with order summary",
+        "Admin sees all orders and can update status (pending/confirmed/shipped/delivered)",
+        "Athlete sees own order history with statuses"
+      ],
+      "passes": false,
+      "notes": "No online payment in v1. Orders are manually fulfilled."
+    },
+    {
+      "id": "F014",
+      "name": "Promotions & Partnerships",
+      "description": "Sezione promozioni e sconti con strutture convenzionate",
+      "priority": "medium",
+      "dependencies": ["F001"],
+      "acceptance_criteria": [
+        "Admin can create promotions with title, description, partner, discount, validity period",
+        "Active promotions displayed on athlete dashboard and shop",
+        "Expired promotions auto-hidden",
+        "Promotion detail shows partner info and discount details"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F015",
+      "name": "Admin Audit Logs",
+      "description": "Log delle modifiche admin: spostamento atleti, modifiche gruppi, gestione pagamenti",
+      "priority": "medium",
+      "dependencies": ["F010"],
+      "acceptance_criteria": [
+        "All admin actions are logged with timestamp, admin_id, action type, entity, details",
+        "Admin can view log history with filters (date range, action type, entity)",
+        "Logs are append-only (no edit/delete)",
+        "Logs include: move_athlete, create_group, update_payment, create_athlete"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "F016",
+      "name": "Mobile-First UI & Brand Theme",
+      "description": "Interfaccia mobile-first con bottom navigation, swipe gestures, tema VRB (gradiente arancione-magenta-viola)",
+      "priority": "high",
+      "dependencies": [],
+      "acceptance_criteria": [
+        "Bottom navigation with 4-5 main sections on mobile",
+        "Touch targets minimum 44px",
+        "VRB gradient theme (orange #F97316 to magenta #EC4899 to purple #7C3AED)",
+        "VRB logo in header (Arena + volleyball player silhouette)",
+        "Responsive: mobile bottom nav, desktop sidebar",
+        "Swipe gestures for attendance marking",
+        "Images optimized for mobile connections (WebP, lazy loading)"
+      ],
+      "passes": false,
+      "notes": "Brand from VRB BRAND IDENTITY MANUAL.pdf. Colors from logo analysis."
+    },
+    {
+      "id": "F017",
+      "name": "Data Migration from Excel",
+      "description": "Import dati esistenti da gruppi_beach_volley_completo_con_formule.xlsx in Supabase",
+      "priority": "high",
+      "dependencies": ["F001", "F004", "F008"],
+      "acceptance_criteria": [
+        "All 17 groups imported with correct structure",
+        "All ~136 athletes imported with group assignments",
+        "Medical certificate data imported (type, expiry)",
+        "Payment data imported (season fee, paid, balance)",
+        "Migration script is repeatable and idempotent",
+        "Data integrity verified post-migration"
+      ],
+      "passes": false,
+      "notes": "Source: VRB/gruppi_beach_volley_completo_con_formule.xlsx — 3 sheets: Gruppi_Atleti (A1:R137), Presenze (A1:I1000), Disponibilita_Recuperi (A1:E20)"
+    }
+  ]
+}

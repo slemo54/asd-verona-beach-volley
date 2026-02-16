@@ -1,0 +1,175 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+/* VRB Brand Theme */
+:root {
+  /* Brand Colors */
+  --vrb-orange: #f97316;
+  --vrb-magenta: #ec4899;
+  --vrb-purple: #7c3aed;
+  --vrb-black: #1a1a1a;
+  --vrb-white: #ffffff;
+  
+  /* Semantic Colors */
+  --vrb-success: #22c55e;
+  --vrb-warning: #eab308;
+  --vrb-danger: #ef4444;
+  --vrb-info: #3b82f6;
+  
+  /* shadcn/ui Theme Variables */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
+  --primary: 24 95% 53%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 10%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 330 81% 60%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 24 95% 53%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 0 0% 10%;
+  --foreground: 0 0% 98%;
+  --card: 0 0% 12%;
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 12%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 24 95% 53%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 18%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 0 0% 18%;
+  --muted-foreground: 0 0% 64%;
+  --accent: 330 81% 60%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 62% 30%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 24 95% 53%;
+}
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  
+  /* VRB Brand Colors */
+  --color-vrb-orange: var(--vrb-orange);
+  --color-vrb-magenta: var(--vrb-magenta);
+  --color-vrb-purple: var(--vrb-purple);
+  --color-vrb-black: var(--vrb-black);
+  --color-vrb-white: var(--vrb-white);
+  --color-vrb-success: var(--vrb-success);
+  --color-vrb-warning: var(--vrb-warning);
+  --color-vrb-danger: var(--vrb-danger);
+  --color-vrb-info: var(--vrb-info);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+/* VRB Gradient Utilities */
+@layer utilities {
+  .gradient-vrb {
+    background: linear-gradient(135deg, var(--vrb-orange) 0%, var(--vrb-magenta) 50%, var(--vrb-purple) 100%);
+  }
+  
+  .gradient-vrb-text {
+    background: linear-gradient(135deg, var(--vrb-orange) 0%, var(--vrb-magenta) 50%, var(--vrb-purple) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .gradient-vrb-subtle {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(236, 72, 153, 0.1) 50%, rgba(124, 58, 237, 0.1) 100%);
+  }
+}
+
+/* Mobile touch targets */
+@layer utilities {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .touch-target-sm {
+    min-height: 36px;
+    min-width: 36px;
+  }
+}
+
+/* Semaphore indicators */
+@layer utilities {
+  .semaphore-green {
+    @apply bg-green-500 text-white;
+  }
+  
+  .semaphore-yellow {
+    @apply bg-yellow-500 text-black;
+  }
+  
+  .semaphore-red {
+    @apply bg-red-500 text-white;
+  }
+}
+
+/* Animation for page transitions */
+@layer utilities {
+  .fade-in {
+    animation: fadeIn 0.2s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
