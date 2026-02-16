@@ -71,7 +71,15 @@ export function useGroups(): UseGroupsReturn {
         throw new Error(supabaseError.message)
       }
 
-      setGroups((data as GroupWithDetails[]) || [])
+      // Normalizza i dati - athlete_count arriva come oggetto { count: X }
+      const normalizedData = ((data as GroupWithDetails[]) || []).map(group => ({
+        ...group,
+        athlete_count: typeof group.athlete_count === 'object' && group.athlete_count !== null 
+          ? (group.athlete_count as unknown as { count: number }).count 
+          : (group.athlete_count || 0)
+      }))
+
+      setGroups(normalizedData)
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Errore sconosciuto"))
     } finally {
